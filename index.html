@@ -2,54 +2,87 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CSAM Design Lab Safety Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CSAM Innovation and Design Lab | Safety &amp; Equipment Quiz</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      max-width: 800px;
-    }
-    h1 {
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-    .question {
-      margin-bottom: 15px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .question-title {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    .options label {
-      display: block;
-      margin-bottom: 4px;
-    }
-    #result {
-      margin-top: 20px;
-      font-weight: bold;
-    }
-    #show-answers {
-      margin-left: 10px;
-    }
+    :root { color-scheme: light; --navy: #0e1a45; --teal: #076768; --purple: #67328e; --line: #d5dde5; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 26px 16px 50px; font-family: Arial, Helvetica, sans-serif; color: var(--navy); background: #f7f9fc; line-height: 1.48; }
+    main { max-width: 820px; margin: 0 auto; }
+    header { padding: 24px 26px; border-top: 8px solid var(--teal); background: white; border-radius: 14px; box-shadow: 0 3px 16px #0e1a4511; }
+    h1 { font-size: clamp(1.55rem, 4.2vw, 2rem); margin: 0 0 8px; }
+    h2 { margin-top: 0; font-size: 1.2rem; }
+    p { margin: 8px 0 0; }
+    .eyebrow { font-size: .85rem; color: var(--teal); font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+    .panel { padding: 22px 26px; margin-top: 18px; background: white; border-radius: 14px; box-shadow: 0 3px 16px #0e1a4511; }
+    .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    label.field-label { display: block; font-weight: bold; margin-bottom: 5px; }
+    input[type="text"], input[type="email"] { display: block; width: 100%; padding: 12px; font: inherit; border: 1px solid #8799aa; border-radius: 8px; }
+    .small { color: #4b596c; font-size: .92rem; }
+    .question { margin-bottom: 14px; padding: 17px 18px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+    .question-title { font-weight: 700; margin-bottom: 9px; }
+    .options label { display: block; padding: 6px 0; cursor: pointer; }
+    .options input { margin-right: 8px; accent-color: var(--teal); }
+    button { background: var(--teal); color: white; border: 0; border-radius: 8px; padding: 13px 22px; font: inherit; font-weight: bold; cursor: pointer; }
+    button:hover:not(:disabled) { background: #084b4d; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    button.secondary { background: var(--purple); margin-top: 10px; }
+    #result { margin-top: 18px; border-radius: 10px; padding: 14px 16px; font-weight: 650; }
+    #result:empty { display: none; }
+    #result.info { background: #edf2fb; border: 1px solid #b8c9eb; }
+    #result.success { background: #e5f6ef; border: 1px solid #88c7ad; }
+    #result.warning { background: #fff4e1; border: 1px solid #e2bf77; }
+    #result.error { background: #ffeae7; border: 1px solid #e4a399; }
+    #retry-btn { display: none; }
+    footer { text-align: center; color: #4b596c; margin-top: 22px; font-size: .9rem; }
+    @media (max-width: 620px) { .student-grid { grid-template-columns: 1fr; } .panel, header { padding: 19px 16px; } }
   </style>
 </head>
 <body>
-  <h1>CSAM Design Lab Safety & Equipment Quiz</h1>
-  <p>Answer all questions, then click "Grade Quiz" to see your score.</p>
+<main>
+  <header>
+    <div class="eyebrow">CSAM Innovation and Design Lab</div>
+    <h1>Safety &amp; Equipment Quiz</h1>
+    <p>Answer all 10 questions. A score of at least <strong><span id="pass-display">70%</span></strong> is required to pass.</p>
+    <p>Passing results are sent automatically to Professor Steven Greenstein once the email service is configured. Passing the quiz does not itself grant access to equipment.</p>
+  </header>
 
-  <div id="quiz"></div>
+  <section class="panel" aria-labelledby="student-heading">
+    <h2 id="student-heading">Student information</h2>
+    <div class="student-grid">
+      <div>
+        <label class="field-label" for="student-name">Full name</label>
+        <input id="student-name" type="text" autocomplete="name" maxlength="120" placeholder="First and last name" required>
+      </div>
+      <div>
+        <label class="field-label" for="student-email">University email</label>
+        <input id="student-email" type="email" autocomplete="email" maxlength="200" placeholder="you@montclair.edu" required>
+      </div>
+    </div>
+    <p class="small">If you pass, your name, email address, score, and completion time will be submitted for your training record. Results are not emailed when you do not pass.</p>
+  </section>
 
-  <button id="grade-btn">Grade Quiz</button>
+  <section class="panel" aria-labelledby="quiz-heading">
+    <h2 id="quiz-heading">Quiz questions</h2>
+    <div id="quiz"></div>
+    <button id="grade-btn" type="button">Grade Quiz &amp; Submit if Passed</button>
+    <button id="retry-btn" class="secondary" type="button">Retry sending results</button>
+    <div id="result" role="status" aria-live="polite"></div>
+  </section>
+  <footer>CSAM Innovation and Design Lab · Safety first. Design and Innovate!</footer>
+</main>
 
+<script>
+  "use strict";
+  // ===== ONE-TIME SETTINGS =====
+  // 70% means at least 7 correct answers out of 10 to pass.
+  const PASS_PERCENT = 70;
+  const NUM_QUESTIONS = 10;
+  // Replace ONLY the placeholder below with the Formspree endpoint from your account.
+  // Example format: https://formspree.io/f/abcdefgh
+  const FORMSPREE_ENDPOINT = "https://formspree.io/f/xpppnyye";
 
-  <div id="result"></div>
-
-  <script>
-    // ===== Question pool (up to 100) =====
-    // Each question: text, options array, and index of correct option
+  // Original question bank, preserved from the existing GitHub quiz.
     const questionPool = [
       {
         text: "Who can grant access to the CSAM Design Lab?",
@@ -444,87 +477,148 @@
       // Add more questions here (up to 100 total) if you like.
     ];
 
-    const NUM_QUESTIONS = 10;
+  function getRandomQuestions(pool, count) {
+    const indices = pool.map((_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    return indices.slice(0, count).map(i => ({ ...pool[i], poolIndex: i }));
+  }
 
-    function getRandomQuestions(pool, count) {
-      const indices = pool.map((_, i) => i);
-      for (let i = indices.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [indices[i], indices[j]] = [indices[j], indices[i]];
+  const selectedQuestions = getRandomQuestions(questionPool, NUM_QUESTIONS);
+  const gradeButton = document.getElementById("grade-btn");
+  const retryButton = document.getElementById("retry-btn");
+  const result = document.getElementById("result");
+  document.getElementById("pass-display").textContent = PASS_PERCENT + "%";
+  let passingRecord = null;
+  let submissionInProgress = false;
+  let submissionSucceeded = false;
+
+  function showResult(message, kind) {
+    result.className = kind;
+    result.textContent = message;
+  }
+
+  function renderQuiz() {
+    const quizDiv = document.getElementById("quiz");
+    quizDiv.innerHTML = "";
+    selectedQuestions.forEach((q, idx) => {
+      const qDiv = document.createElement("div");
+      qDiv.className = "question";
+      const title = document.createElement("div");
+      title.className = "question-title";
+      title.textContent = (idx + 1) + ". " + q.text;
+      const optionsDiv = document.createElement("div");
+      optionsDiv.className = "options";
+      q.options.forEach((option, optionIndex) => {
+        const label = document.createElement("label");
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "q" + idx;
+        radio.value = String(optionIndex);
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(option));
+        optionsDiv.appendChild(label);
+      });
+      qDiv.append(title, optionsDiv);
+      quizDiv.appendChild(qDiv);
+    });
+  }
+
+  function getStudentInfo() {
+    const nameInput = document.getElementById("student-name");
+    const emailInput = document.getElementById("student-email");
+    const fullName = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    if (!fullName) { showResult("Please enter your full name first.", "warning"); nameInput.focus(); return null; }
+    if (!email || !emailInput.checkValidity()) { showResult("Please enter a valid email address.", "warning"); emailInput.focus(); return null; }
+    return { fullName, email };
+  }
+
+  function lockCompletedQuiz() {
+    document.querySelectorAll('input[type="radio"]').forEach(input => { input.disabled = true; });
+    document.getElementById("student-name").readOnly = true;
+    document.getElementById("student-email").readOnly = true;
+    gradeButton.disabled = true;
+  }
+
+  function gradeQuiz() {
+    if (passingRecord || submissionInProgress || submissionSucceeded) return;
+    const student = getStudentInfo();
+    if (!student) return;
+
+    let score = 0;
+    for (let i = 0; i < selectedQuestions.length; i++) {
+      const checked = document.querySelector('input[name="q' + i + '"]:checked');
+      if (!checked) {
+        showResult("Please answer all 10 questions before grading. Question " + (i + 1) + " is unanswered.", "warning");
+        document.querySelectorAll(".question")[i].scrollIntoView({behavior: "smooth", block: "center"});
+        return;
       }
-      const selectedIndices = indices.slice(0, count);
-      return selectedIndices.map(i => ({ ...pool[i], poolIndex: i }));
+      if (Number(checked.value) === selectedQuestions[i].answer) score++;
     }
 
-    const selectedQuestions = getRandomQuestions(questionPool, NUM_QUESTIONS);
+    const percentage = Math.round(100 * score / selectedQuestions.length);
+    const scoreText = score + "/" + selectedQuestions.length + " (" + percentage + "%)";
+    if (percentage < PASS_PERCENT) {
+      showResult("Score: " + scoreText + ". You have not reached the " + PASS_PERCENT + "% passing mark. Refresh this page to try a new set of questions. No email has been sent.", "warning");
+      gradeButton.disabled = true;
+      return;
+    }
 
-    function renderQuiz() {
-      const quizDiv = document.getElementById("quiz");
-      quizDiv.innerHTML = "";
-      selectedQuestions.forEach((q, idx) => {
-        const qDiv = document.createElement("div");
-        qDiv.className = "question";
-        qDiv.dataset.poolIndex = q.poolIndex;
+    passingRecord = {
+      name: student.fullName,
+      email: student.email,
+      score: scoreText,
+      passing_score: PASS_PERCENT + "%",
+      status: "PASSED",
+      completed_at_utc: new Date().toISOString(),
+      quiz: "CSAM Innovation and Design Lab Safety & Equipment Quiz",
+      _subject: "CSAM Lab Safety Quiz PASSED - " + student.fullName
+    };
+    lockCompletedQuiz();
+    sendPassingRecord();
+  }
 
-        const title = document.createElement("div");
-        title.className = "question-title";
-        title.textContent = (idx + 1) + ". " + q.text;
-
-        const optionsDiv = document.createElement("div");
-        optionsDiv.className = "options";
-
-        q.options.forEach((opt, optIndex) => {
-          const label = document.createElement("label");
-          const radio = document.createElement("input");
-          radio.type = "radio";
-          radio.name = "q" + idx;
-          radio.value = optIndex;
-          label.appendChild(radio);
-          label.appendChild(document.createTextNode(" " + opt));
-          optionsDiv.appendChild(label);
-        });
-
-        qDiv.appendChild(title);
-        qDiv.appendChild(optionsDiv);
-        quizDiv.appendChild(qDiv);
+  async function sendPassingRecord() {
+    if (!passingRecord || submissionInProgress || submissionSucceeded) return;
+    if (FORMSPREE_ENDPOINT.includes("REPLACE_WITH_FORM_ID")) {
+      showResult("You passed (" + passingRecord.score + "), but automatic email is not configured yet. The lab administrator must enter the Formspree endpoint in index.html. Your result has NOT been sent.", "error");
+      return;
+    }
+    submissionInProgress = true;
+    retryButton.style.display = "none";
+    showResult("You passed (" + passingRecord.score + "). Submitting your results securely…", "info");
+    try {
+      const data = new FormData();
+      Object.entries(passingRecord).forEach(([key, value]) => data.append(key, value));
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        body: data,
+        headers: { "Accept": "application/json" }
       });
+      if (!response.ok) {
+        let details = "";
+        try {
+          const errorBody = await response.json();
+          details = (errorBody.errors || []).map(e => e.message).join("; ");
+        } catch (_) { /* response body may not be JSON */ }
+        throw new Error(details || "Submission failed (HTTP " + response.status + ").");
+      }
+      submissionSucceeded = true;
+      showResult("Passed! Score: " + passingRecord.score + ". Your results were accepted for submission to Professor Greenstein. You do not need to email a screenshot. Please wait for authorization before using lab equipment.", "success");
+    } catch (err) {
+      showResult("You passed (" + passingRecord.score + "), but we could not confirm submission. Your result may NOT have reached Professor Greenstein. Check your internet connection and select 'Retry sending results'. " + (err.message || ""), "error");
+      retryButton.style.display = "inline-block";
+    } finally {
+      submissionInProgress = false;
     }
+  }
 
-    function gradeQuiz() {
-      let score = 0;
-      selectedQuestions.forEach((q, idx) => {
-        const radios = document.getElementsByName("q" + idx);
-        let userAnswer = null;
-        radios.forEach(r => {
-          if (r.checked) {
-            userAnswer = parseInt(r.value, 10);
-          }
-        });
-        if (userAnswer === q.answer) {
-          score++;
-        }
-      });
-      const percent = Math.round((score / selectedQuestions.length) * 100);
-      document.getElementById("result").innerHTML =
-        "Score: " + score + " / " + selectedQuestions.length + " (" + percent + "%)" +
-        "<br><br>Please email a screenshot of this score to <strong>greensteins@mail.montclair.edu</strong> to complete your training record.";
-    }
-
-    function showCorrectAnswers() {
-      const questionDivs = document.querySelectorAll(".question");
-      questionDivs.forEach((qDiv, idx) => {
-        const q = selectedQuestions[idx];
-        const labels = qDiv.querySelectorAll("label");
-        labels.forEach((label, optionIndex) => {
-          label.style.fontWeight = (optionIndex === q.answer) ? "bold" : "normal";
-          label.style.color = (optionIndex === q.answer) ? "green" : "black";
-        });
-      });
-    }
-
-    document.getElementById("grade-btn").addEventListener("click", gradeQuiz);
-    
-    renderQuiz();
-  </script>
+  gradeButton.addEventListener("click", gradeQuiz);
+  retryButton.addEventListener("click", sendPassingRecord);
+  renderQuiz();
+</script>
 </body>
 </html>
