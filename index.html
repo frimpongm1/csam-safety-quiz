@@ -34,6 +34,9 @@
     #result.warning { background: #fff4e1; border: 1px solid #e2bf77; }
     #result.error { background: #ffeae7; border: 1px solid #e4a399; }
     #retry-btn { display: none; }
+    [hidden] { display: none !important; }
+    .checkin-link { display: inline-block; margin-top: 14px; padding: 12px 18px; color: #fff; background: var(--purple); border-radius: 8px; text-decoration: none; font-weight: bold; }
+    .checkin-link:hover, .checkin-link:focus-visible { background: #4c246b; }
     footer { text-align: center; color: #4b596c; margin-top: 22px; font-size: .9rem; }
     @media (max-width: 620px) { .student-grid { grid-template-columns: 1fr; } .panel, header { padding: 19px 16px; } }
   </style>
@@ -44,7 +47,8 @@
     <div class="eyebrow">CSAM Innovation and Design Lab</div>
     <h1>Safety &amp; Equipment Quiz</h1>
     <p>Answer all 10 questions. A score of at least <strong><span id="pass-display">70%</span></strong> is required to pass.</p>
-    <p>Passing results are sent automatically to Professor Steven Greenstein once the email service is configured. Passing the quiz does not itself grant access to equipment.</p>
+    <p><strong>After you pass:</strong> Scan the Check-In QR code and complete the check-in form whenever you visit the lab. Submit a new check-in each time you enter.</p>
+    <p>Your passing result will be submitted to Professor Steven Greenstein. Passing the quiz and checking in do not replace any required authorization to use lab equipment.</p>
   </header>
 
   <section class="panel" aria-labelledby="student-heading">
@@ -68,6 +72,7 @@
     <button id="grade-btn" type="button">Grade Quiz &amp; Submit if Passed</button>
     <button id="retry-btn" class="secondary" type="button">Retry sending results</button>
     <div id="result" role="status" aria-live="polite"></div>
+    <a id="checkin-link" class="checkin-link" href="https://frimpongm1.github.io/csam-safety-quiz/check-in.html" target="_blank" rel="noopener" hidden>Open Check-In Form</a>
   </section>
   <footer>CSAM Innovation and Design Lab · Safety first. Design and Innovate!</footer>
 </main>
@@ -498,6 +503,7 @@
   function showResult(message, kind) {
     result.className = kind;
     result.textContent = message;
+    document.getElementById("checkin-link").hidden = (kind !== "success");
   }
 
   function renderQuiz() {
@@ -607,7 +613,7 @@
         throw new Error(details || "Submission failed (HTTP " + response.status + ").");
       }
       submissionSucceeded = true;
-      showResult("Passed! Score: " + passingRecord.score + ". Your results were accepted for submission to Professor Greenstein. You do not need to email a screenshot. Please wait for authorization before using lab equipment.", "success");
+      showResult("Passed! Score: " + passingRecord.score + ". Your results were accepted by Formspree for Professor Greenstein. On future visits, scan the Check-In QR code and complete the check-in form each time you enter the lab. You can also use the link below. Equipment use still requires any necessary authorization.", "success");
     } catch (err) {
       showResult("You passed (" + passingRecord.score + "), but we could not confirm submission. Your result may NOT have reached Professor Greenstein. Check your internet connection and select 'Retry sending results'. " + (err.message || ""), "error");
       retryButton.style.display = "inline-block";
