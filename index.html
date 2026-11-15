@@ -47,7 +47,7 @@
     <div class="eyebrow">CSAM Innovation and Design Lab</div>
     <h1>Safety &amp; Equipment Quiz</h1>
     <p>Answer all 10 questions. A score of at least <strong><span id="pass-display">70%</span></strong> is required to pass.</p>
-    <p><strong>After you pass:</strong> Scan the Check-In QR code and complete the check-in form whenever you visit the lab. Submit a new check-in each time you enter.</p>
+    <p><strong>After you pass:</strong> Request lab access from Professor Steven Greenstein. Your CWID is required to arrange access and will be included with your passing result. Once authorized, scan the Check-In QR code and complete the check-in form whenever you visit the lab. Submit a new check-in each time you enter.</p>
     <p>Your passing result will be submitted to Professor Steven Greenstein. Passing the quiz and checking in do not replace any required authorization to use lab equipment.</p>
   </header>
 
@@ -62,8 +62,13 @@
         <label class="field-label" for="student-email">University email</label>
         <input id="student-email" type="email" autocomplete="email" maxlength="200" placeholder="you@montclair.edu" required>
       </div>
+      <div>
+        <label class="field-label" for="student-cwid">What is your CWID? (required)</label>
+        <input id="student-cwid" name="cwid" type="text" autocomplete="off" maxlength="40" placeholder="Enter your Campus-Wide ID" aria-describedby="cwid-help" required>
+        <p id="cwid-help" class="small">Your Campus-Wide ID (CWID) is needed to arrange lab access after you pass.</p>
+      </div>
     </div>
-    <p class="small">If you pass, your name, email address, score, and completion time will be submitted for your training record. Results are not emailed when you do not pass.</p>
+    <p class="small">If you pass, your name, email address, CWID, score, and completion time will be submitted for your training record. Results are not emailed when you do not pass.</p>
   </section>
 
   <section class="panel" aria-labelledby="quiz-heading">
@@ -535,17 +540,21 @@
   function getStudentInfo() {
     const nameInput = document.getElementById("student-name");
     const emailInput = document.getElementById("student-email");
+    const cwidInput = document.getElementById("student-cwid");
+    const cwid = cwidInput.value.trim();
     const fullName = nameInput.value.trim();
     const email = emailInput.value.trim();
     if (!fullName) { showResult("Please enter your full name first.", "warning"); nameInput.focus(); return null; }
     if (!email || !emailInput.checkValidity()) { showResult("Please enter a valid email address.", "warning"); emailInput.focus(); return null; }
-    return { fullName, email };
+    if (!cwid) { showResult("Please enter your CWID (Campus-Wide ID). It is required to arrange lab access.", "warning"); cwidInput.focus(); return null; }
+    return { fullName, email, cwid };
   }
 
   function lockCompletedQuiz() {
     document.querySelectorAll('input[type="radio"]').forEach(input => { input.disabled = true; });
     document.getElementById("student-name").readOnly = true;
     document.getElementById("student-email").readOnly = true;
+    document.getElementById("student-cwid").readOnly = true;
     gradeButton.disabled = true;
   }
 
@@ -576,6 +585,7 @@
     passingRecord = {
       name: student.fullName,
       email: student.email,
+      cwid: student.cwid,
       score: scoreText,
       passing_score: PASS_PERCENT + "%",
       status: "PASSED",
@@ -613,7 +623,7 @@
         throw new Error(details || "Submission failed (HTTP " + response.status + ").");
       }
       submissionSucceeded = true;
-      showResult("Passed! Score: " + passingRecord.score + ". Your results were accepted by Formspree for Professor Greenstein. On future visits, scan the Check-In QR code and complete the check-in form each time you enter the lab. You can also use the link below. Equipment use still requires any necessary authorization.", "success");
+      showResult("Passed! Score: " + passingRecord.score + ". Your results, including your CWID, were accepted by Formspree for Professor Greenstein. Next, request lab access from Professor Steven Greenstein. Passing this quiz does not automatically grant access. Once authorized, scan the Check-In QR code and complete the check-in form each time you enter the lab. You can also use the link below. Equipment use still requires any necessary authorization.", "success");
     } catch (err) {
       showResult("You passed (" + passingRecord.score + "), but we could not confirm submission. Your result may NOT have reached Professor Greenstein. Check your internet connection and select 'Retry sending results'. " + (err.message || ""), "error");
       retryButton.style.display = "inline-block";
